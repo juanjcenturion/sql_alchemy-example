@@ -1,0 +1,17 @@
+#version de docker-compose
+version: '3'
+#Lista de servicios
+services:
+  flask_app: #servicios app
+    build:   #lista de params.
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5005:5005" # puerto que expone el contenedor : puerto del host donde escuchamos.
+    # restart: always # En caso de error, reintenta.
+    volumes:
+      - .:/SQL_ALCHEMY
+    env_file:
+      - .env
+
+
