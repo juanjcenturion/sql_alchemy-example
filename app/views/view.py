@@ -22,7 +22,7 @@ from werkzeug.security import(
 #IMPORTS PROPIOS
 from app import app, db, jwt
 from app.models.models import *
-from app.schemas.shema  import(
+from app.schemas.schema  import(
     UserAdminSchema,
     UserBasicSchema,
     PaisSchema,

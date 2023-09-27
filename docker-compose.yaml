@@ -13,5 +13,35 @@ services:
       - .:/SQL_ALCHEMY
     env_file:
       - .env
+    depends_on:
+      - mysql_db
+    container_name: flask_app_b
 
 
+    # links:
+    #   - app-db
+
+  # app-db:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+
+  #   environment:
+  #   - MYSQL_ROOT_PASSWORD=root
+  #   - MYSQL_DATABASE=root
+  #   ports:
+  #     - 3306:3306
+
+  mysql_db:
+    image: mysql:5.7  # Use the official MySQL 5.7 image from Docker Hub
+    environment:
+      MYSQL_ROOT_PASSWORD: root  # Set the root password for MySQL
+      MYSQL_DATABASE: alchemy_b  # Create a database named 'mydatabase'
+      MYSQL_USER: db_user  # Create a MySQL user 'myuser'
+      MYSQL_PASSWORD: root  # Set the password for 'myuser'
+    volumes:
+      - ./.data/db:/var/lib/mysql
+    ports:
+      - "3306:3306"  # Map host port 3306 to container port 3306 for MySQL
+    restart: always  # Restarts the MySQL container if it stops or crashes
+    container_name: mysql_database
