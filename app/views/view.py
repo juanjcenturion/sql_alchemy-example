@@ -10,11 +10,15 @@ from flask import (
     url_for, 
     jsonify
 )
+
 from flask_jwt_extended import ( 
     jwt_required, 
     create_access_token, 
     get_jwt_identity, 
     get_jwt)
+
+from flask.views import MethodView
+
 from werkzeug.security import( 
     generate_password_hash, 
     check_password_hash
@@ -29,6 +33,51 @@ from app.schemas.schema  import(
     ProvinciaSchema,
     LocalidadSchema
 )
+
+
+
+class PaisAPI(MethodView):
+    def get(self, pais_id=None):
+        if pais_id is None:
+            paises = Pais.query.all()
+            resultado = PaisSchema().dump(paises, many=True)
+        else:
+            pais = Pais.query.get(pais_id)
+            resultado = PaisSchema().dump(pais)
+        return jsonify(resultado)
+    
+    def post(self):
+        pais_json =  PaisSchema().load(request.json)
+        nombre = pais_json.get('nombre')
+
+        #MODO PROLIJO Y RECOMENDABLE
+        nuevo_pais = Pais(nombre=nombre)
+        db.session.add(nuevo_pais)
+        db.session.commit()
+
+        #MODELO NO RECOMENDABLE
+        #nuevo_pais = Pais(**pais_json)
+        return jsonify(PaisSchema().dump(nuevo_pais)),201
+    
+    def put(self, pais_id): #se le pasa un parametro que es siempre el id
+        pais = Pais.query.get(pais_id)
+        pais_json = PaisSchema().load(request.json)
+        nombre = pais_json.get("nombre")
+        pais.nombre = nombre
+        db.session.commit()
+        return jsonify(PaisSchema().dump(pais))
+    
+    def delete(self, pais_id):
+        pais = Pais.query.get(pais_id)
+        db.session.delete(pais)
+        db.session.commit()
+        return jsonify(mensaje=f"Borraste el pais {pais_id}")
+    
+app.add_url_rule("/pais", view_func=PaisAPI.as_view('pais'))
+app.add_url_rule("/pais/<pais_id>", 
+                view_func=PaisAPI.as_view('pais_por_id')
+                )
+
 
 @app.route("/users")
 @jwt_required()
@@ -64,11 +113,6 @@ def get_all_users():
             }
         )
 
-@app.route("/paises")
-def get_all_paises():
-    paises = Pais.query.all()
-    paises_schema = PaisSchema().dump(paises,many=True)
-    return jsonify(paises_schema)
 
 @app.route("/provincias")
 def get_all_provincias():
@@ -107,26 +151,7 @@ def index():
         'index.html'
     )
 
-@app.route('/agregar_pais', methods=['POST'])
-def nuevo_pais():
-    if request.method=='POST':
-        nombre_pais = request.form['nombre']
-        
-        #Inicializo el objeto
-        nuevo_pais = Pais(nombre=nombre_pais)
-        #Preparo el objeto para enviarlo a la base de datos
-        db.session.add(nuevo_pais)
-        #envio objeto a DDBB
-        db.session.commit()
 
-        return redirect(url_for('index'))
-
-@app.route('/borrar_pais/<id>')
-def borrar_pais(id):
-    pais= Pais.query.get(id)
-    db.session.delete(pais)
-    db.session.commit()
-    return redirect(url_for('index'))
 
 @app.route('/add_user', methods=['POST'])
 def add_user():

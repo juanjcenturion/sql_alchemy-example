@@ -21,6 +21,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 
 app= Flask(__name__)
+load_dotenv()
 
 #app.config['SQLALCHEY_DATABASE_URI'] = mysql+pymysql://usuario:contraseña@ip/nombre_db
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
@@ -32,7 +33,6 @@ migrate = Migrate(app, db) #recibe la app en si y donde va a instanciar el migra
 jwt = JWTManager(app)
 ma= Marshmallow(app)
 
-load_dotenv()
 
 from app.views import view
 
